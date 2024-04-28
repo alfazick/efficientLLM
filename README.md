@@ -11,5 +11,6 @@ then download the model
 
 llm model optimizations to decrease latency
 
-1. KV model
-2. Batching
+**1. KV model**
+**2. Batching**
+**3. Continuous Batching**
