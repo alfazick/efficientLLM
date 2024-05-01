@@ -1,0 +1,42 @@
+Here's the breakdown of the intermediate results at each step of processing 
+the attention_mask using the truncate_left function:
+
+1. Zero Mask
+This boolean tensor indicates where the zeros are in the original attention_mask. Here's the result:
+
+[[ True,  True, False, False, False, False, False],
+ [ True, False, False, False, False,  True,  True],
+ [ True,  True,  True, False, False, False, False]]
+True corresponds to positions with a value of 0 in the attention_mask.
+False corresponds to positions with a value of 1.
+2. Cumulative Product (Cumprod)
+This tensor shows the cumulative product of the zero mask along each row, which helps in identifying continuous stretches of leading zeros:
+
+[[1, 1, 0, 0, 0, 0, 0],
+ [1, 0, 0, 0, 0, 0, 0],
+ [1, 1, 1, 0, 0, 0, 0]]
+The cumulative product multiplies True (treated as 1) and False (treated as 0) across each row.
+The multiplication ceases and results in zeros once a False is encountered, indicating the presence of a non-zero token.
+3. Leading Zeros Count
+This vector indicates the total number of leading zeros in each row:
+
+[2, 1, 3]
+It sums up the 1s from the cumprod tensor, which represent continuous stretches of leading zeros.
+4. Minimum Leading Zeros
+This scalar value represents the smallest count of leading zeros across all sequences, which dictates how much we can truncate uniformly from the left without losing data:
+
+
+The smallest count of leading zeros across all sequences is 1, which is from the second sequence.
+5. Truncation Offset
+This scalar value indicates the number of columns that can be truncated from the start of each sequence:
+
+We can remove one column from the beginning of all sequences, which will optimize processing without cutting off any important data from the sequences.
+Applying Truncation
+Now that we know we can truncate 1 column from the left of each sequence, here's what the truncated attention_mask would look like:
+
+truncated_attention_mask = attention_mask[:, truncation_offset:]
+This step would result in:
+
+[[0, 1, 1, 1, 1, 1],
+ [1, 1, 1, 1, 0, 0],
+ [0, 0, 1, 1, 1, 1]]
